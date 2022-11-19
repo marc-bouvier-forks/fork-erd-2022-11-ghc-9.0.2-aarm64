@@ -17,7 +17,7 @@ import           Control.Monad         (liftM2, void, when)
 import           Data.Char             (isAlphaNum, isControl, isSpace)
 import qualified Data.Map              as M
 import           Data.Maybe
-import           Data.Text.Lazy
+import qualified Data.Text.Lazy
 import           Text.Parsec
 import           Text.Parsec.Text.Lazy
 import           Text.Printf           (printf)
@@ -124,27 +124,27 @@ comment = do
   _ <- manyTill anyChar $ try eol
   return Nothing
 
-ident :: Parser Text
+ident :: Parser Data.Text.Lazy.Text
 ident = do
   spacesNoNew
   n <- identQuoted <|> identNoSpace
   spacesNoNew
   return n
 
-identQuoted :: Parser Text
+identQuoted :: Parser Data.Text.Lazy.Text
 identQuoted = do
   quote <- oneOf "'\"`"
   let p = satisfy (\c -> c /= quote && not (isControl c) )
             <?> "any character except " ++ [quote] ++ " or control characters"
-  n <- fmap pack (many1 p)
+  n <- fmap Data.Text.Lazy.pack (many1 p)
   _ <- char quote
   return n
 
-identNoSpace :: Parser Text
+identNoSpace :: Parser Data.Text.Lazy.Text
 identNoSpace = do
   let p = satisfy (\c -> c == '_' || isAlphaNum c)
             <?> "letter, digit or underscore"
-  fmap pack (many1 p)
+  fmap Data.Text.Lazy.pack (many1 p)
 
 emptiness :: Parser ()
 emptiness = skipMany (void (many1 space) <|> eolComment)
